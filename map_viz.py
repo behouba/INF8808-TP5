@@ -29,8 +29,19 @@ def add_choro_trace(fig, montreal_data, locations, z_vals, colorscale):
             fig: The updated figure with the choropleth trace
 
     '''
-    # TODO : Draw the map base
-    return None
+    fig.add_trace(go.Choroplethmapbox(
+        geojson=montreal_data,
+        locations=locations,
+        z=z_vals,
+        featureidkey='properties.NOM',
+        colorscale=colorscale,
+        showscale=False,
+        marker_opacity=0.2,
+        marker_line_width=1,
+        marker_line_color='#000000',
+        hovertemplate=hover.map_base_hover_template(),
+    ))
+    return fig
 
 
 def add_scatter_traces(fig, street_df):
@@ -47,5 +58,19 @@ def add_scatter_traces(fig, street_df):
             The figure now containing the scatter trace
 
     '''
-    # TODO : Add the scatter markers to the map base
-    return None
+    colors = px.colors.qualitative.Plotly
+    groups = street_df.groupby('properties.TYPE_SITE_INTERVENTION', sort=False)
+
+    for (site_type, subset), color in zip(groups, colors):
+        fig.add_trace(go.Scattermapbox(
+            lat=subset['properties.LATITUDE'],
+            lon=subset['properties.LONGITUDE'],
+            mode='markers',
+            marker=dict(size=20, color=color),
+            name=site_type,
+            customdata=subset[['properties.NOM_PROJET',
+                               'properties.MODE_IMPLANTATION',
+                               'properties.OBJECTIF_THEMATIQUE']].values,
+            hovertemplate=hover.map_marker_hover_template(site_type),
+        ))
+    return fig
