@@ -17,8 +17,8 @@ def no_clicks(style):
             theme: The updated display theme
             style: The updated display style for the panel
     '''
-    # TODO : Handle no clicks on the map
-    return None, None, None, None
+    style['visibility'] = 'hidden'
+    return None, None, None, style
 
 
 def map_base_clicked(title, mode, theme, style):
@@ -37,8 +37,7 @@ def map_base_clicked(title, mode, theme, style):
             theme: The updated display theme
             style: The updated display style for the panel
     '''
-    # TODO : Handle clicks on the map base
-    return None, None, None, None
+    return title, mode, theme, style
 
 
 def map_marker_clicked(figure, curve, point, title, mode, theme, style): # noqa : E501 pylint: disable=unused-argument too-many-arguments line-too-long
@@ -59,5 +58,19 @@ def map_marker_clicked(figure, curve, point, title, mode, theme, style): # noqa 
             theme: The updated display theme
             style: The updated display style for the panel
     '''
-    # TODO : Handle clicks on the markers
-    return None, None, None, None
+    trace = figure['data'][curve]
+    color = trace['marker']['color']
+    name, implantation, themes = trace['customdata'][point]
+
+    new_title = html.Span(name, style={'color': color})
+    new_mode = implantation
+
+    if isinstance(themes, str) and themes.strip():
+        items = [line for line in themes.splitlines() if line.strip()]
+        new_theme = [html.Div('Thématique :'),
+                     html.Ul([html.Li(line) for line in items])]
+    else:
+        new_theme = None
+
+    new_style = {**style, 'visibility': 'visible'}
+    return new_title, new_mode, new_theme, new_style
